@@ -45,6 +45,13 @@ export const listPosts = `query ListPosts(
       postBody
       createdAt
       comments {
+        items {
+          id
+          commentOwnerId
+          commentOwnerUsername
+          content
+          createdAt
+        }
         nextToken
       }
       likes {

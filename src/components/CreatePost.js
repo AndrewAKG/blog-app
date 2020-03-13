@@ -1,7 +1,6 @@
 import React from 'react';
-import { API, graphqlOperation } from 'aws-amplify';
+import { Auth, API, graphqlOperation } from 'aws-amplify';
 import { createPost } from '../graphql/mutations';
-import { Auth } from 'aws-amplify';
 
 class CreatePost extends React.Component {
   state = {
