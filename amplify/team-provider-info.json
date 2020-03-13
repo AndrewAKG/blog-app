@@ -1,0 +1,14 @@
+{
+    "blogapi": {
+        "awscloudformation": {
+            "AuthRoleName": "blog-app-blogapi-20200313110512-authRole",
+            "UnauthRoleArn": "arn:aws:iam::675174988545:role/blog-app-blogapi-20200313110512-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::675174988545:role/blog-app-blogapi-20200313110512-authRole",
+            "Region": "eu-west-2",
+            "DeploymentBucketName": "blog-app-blogapi-20200313110512-deployment",
+            "UnauthRoleName": "blog-app-blogapi-20200313110512-unauthRole",
+            "StackName": "blog-app-blogapi-20200313110512",
+            "StackId": "arn:aws:cloudformation:eu-west-2:675174988545:stack/blog-app-blogapi-20200313110512/ba126460-6509-11ea-a254-06b0998bdefc"
+        }
+    }
+}
