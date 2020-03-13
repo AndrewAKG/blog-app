@@ -8,7 +8,13 @@
             "DeploymentBucketName": "blog-app-blogapi-20200313110512-deployment",
             "UnauthRoleName": "blog-app-blogapi-20200313110512-unauthRole",
             "StackName": "blog-app-blogapi-20200313110512",
-            "StackId": "arn:aws:cloudformation:eu-west-2:675174988545:stack/blog-app-blogapi-20200313110512/ba126460-6509-11ea-a254-06b0998bdefc"
+            "StackId": "arn:aws:cloudformation:eu-west-2:675174988545:stack/blog-app-blogapi-20200313110512/ba126460-6509-11ea-a254-06b0998bdefc",
+            "AmplifyAppId": "d3v2mh4p62bpd2"
+        },
+        "categories": {
+            "auth": {
+                "blogapp65262a5a": {}
+            }
         }
     }
 }
