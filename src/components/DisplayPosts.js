@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { listPosts } from '../graphql/queries';
-import { onCreatePost, onDeletePost, onUpdatePost, onCreateComment, onCreateLike, onDeleteLike } from '../graphql/subscriptions';
+import { onCreatePost, onDeletePost, onUpdatePost, onCreateComment, onCreateLike, onDeleteLike, onDeleteComment } from '../graphql/subscriptions';
 import { Auth, API, graphqlOperation } from 'aws-amplify';
-import { createLike, deletePost, deleteLike } from '../graphql/mutations';
+import { createLike, deletePost, deleteLike, deleteComment } from '../graphql/mutations';
 import EditPost from './EditPost';
 import CreateComment from './CreateComment';
 import CommentCell from './CommentCell';
@@ -82,6 +82,21 @@ class DisplayPosts extends Component {
         }
       });
 
+    this.deletePostCommentListener = API.graphql(graphqlOperation(onDeleteComment))
+      .subscribe({
+        next: commentData => {
+          const deletedComment = commentData.value.data.onDeleteComment;
+          let posts = [...this.state.posts];
+          for (let post of posts) {
+            if (deletedComment.post.id === post.id) {
+              let newComments = post.comments.items.filter(item => item.id !== deletedComment.id);
+              post.comments.items = newComments;
+            }
+          }
+          this.setState({ posts });
+        }
+      });
+
     this.createPostLikeListener = API.graphql(graphqlOperation(onCreateLike))
       .subscribe({
         next: likeData => {
@@ -96,7 +111,7 @@ class DisplayPosts extends Component {
         }
       });
 
-    this.createPostLikeListener = API.graphql(graphqlOperation(onDeleteLike))
+    this.deletePostLikeListener = API.graphql(graphqlOperation(onDeleteLike))
       .subscribe({
         next: likeData => {
           const deletedLike = likeData.value.data.onDeleteLike;
@@ -117,11 +132,19 @@ class DisplayPosts extends Component {
     this.updatePostListener.unsubscribe();
     this.deletePostListener.unsubscribe();
     this.createPostCommentListener.unsubscribe();
+    this.deletePostCommentListener.unsubscribe();
+    this.createLikeCommentListener.unsubscribe();
+    this.deleteLikeCommentListener.unsubscribe();
   }
 
   handleDeletePost = async (id) => {
     const input = { id };
     await API.graphql(graphqlOperation(deletePost, { input }));
+  }
+
+  handleDeleteComment = async (id) => {
+    const input = { id };
+    await API.graphql(graphqlOperation(deleteComment, { input }));
   }
 
   getPosts = async () => {
@@ -238,7 +261,14 @@ class DisplayPosts extends Component {
                       <Grid item xs={12}>
                         <List >
                           {
-                            post.comments.items.map((comment, index) => <CommentCell key={index} commentData={comment} />)
+                            post.comments.items.map((comment, index) => (
+                              <CommentCell
+                                key={index}
+                                commentData={comment}
+                                enableDelete={comment.commentOwnerId === this.state.ownerId}
+                                onDeleteClick={() => this.handleDeleteComment(comment.id)}
+                              />
+                            ))
                           }
                         </List>
                       </Grid>

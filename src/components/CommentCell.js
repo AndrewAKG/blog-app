@@ -1,8 +1,9 @@
 import React from 'react';
-import { ListItem, ListItemText, ListItemAvatar, Avatar, Typography } from '@material-ui/core';
+import { ListItem, ListItemText, ListItemAvatar, ListItemSecondaryAction, Avatar, Typography, IconButton } from '@material-ui/core';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import DeleteIcon from '@material-ui/icons/Delete';
 
-const CommentCell = ({ commentData }) => {
+const CommentCell = ({ commentData, onDeleteClick, enableDelete }) => {
   const { content, commentOwnerUsername, createdAt } = commentData;
   return (
     <ListItem>
@@ -23,11 +24,11 @@ const CommentCell = ({ commentData }) => {
           </time>
         </Typography>}
       />
-      {/* <ListItemSecondaryAction>
-        <IconButton edge="end" aria-label="delete">
+      { enableDelete && <ListItemSecondaryAction>
+        <IconButton edge="end" onClick={onDeleteClick}>
           <DeleteIcon />
         </IconButton>
-      </ListItemSecondaryAction> */}
+      </ListItemSecondaryAction>}
     </ListItem>
   )
 }
