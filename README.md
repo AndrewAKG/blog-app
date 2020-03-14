@@ -1,2 +1,2 @@
 # blog-app
-Blog app using react, aws appsync, graphql and dynamo db.
+Simple real-time blog app using react, aws appsync, aws amplify, graphql and aws dynamo db.
