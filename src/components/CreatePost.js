@@ -22,9 +22,7 @@ class CreatePost extends React.Component {
     this.setState({ [name]: event.target.value })
   }
 
-  handleAddPost = async (event) => {
-    event.preventDefault();
-
+  addPost = async () => {
     const { postOwnerId, postOwnerUsername, postTitle, postBody } = this.state;
     const input = {
       postOwnerId,
@@ -36,6 +34,18 @@ class CreatePost extends React.Component {
 
     await API.graphql(graphqlOperation(createPost, { input }));
     this.setState({ postTitle: "", postBody: "" });
+  }
+
+  handleAddPost = async (event) => {
+    event.preventDefault();
+    await this.addPost();
+  }
+
+  handleKeyPress = async e => {
+    if (e.key === 'Enter' && this.state.postTitle && this.state.postBody) {
+      e.preventDefault();
+      await this.addPost();
+    }
   }
 
   render() {
@@ -53,6 +63,7 @@ class CreatePost extends React.Component {
                 variant="outlined"
                 value={this.state.postTitle}
                 onChange={this.handlePostChange('postTitle')}
+                onKeyPress={(e) => this.handleKeyPress(e)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -66,6 +77,7 @@ class CreatePost extends React.Component {
                 required
                 value={this.state.postBody}
                 onChange={this.handlePostChange('postBody')}
+                onKeyPress={(e) => this.handleKeyPress(e)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -78,6 +90,7 @@ class CreatePost extends React.Component {
                     paddingRight: '20px'
                   }}
                   onClick={this.handleAddPost}
+                  disabled={!this.state.postBody || !this.state.postTitle}
                 >
                   Post
                 </Button>

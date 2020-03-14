@@ -22,9 +22,7 @@ class CreateComment extends React.Component {
 
   handleChangeContent = event => this.setState({ content: event.target.value });
 
-  handleAddComment = async event => {
-    event.preventDefault();
-
+  addComment = async () => {
     const input = {
       commentPostId: this.props.postId,
       commentOwnerId: this.state.commentOwnerId,
@@ -35,21 +33,17 @@ class CreateComment extends React.Component {
     await API.graphql(graphqlOperation(createComment, { input }));
 
     this.setState({ content: "" }); // clear field
+  }
+
+  handleAddComment = async event => {
+    event.preventDefault();
+    await this.addComment();
   };
 
   handleKeyPress = async e => {
     if (e.key === 'Enter' && this.state.content) {
       e.preventDefault();
-      const input = {
-        commentPostId: this.props.postId,
-        commentOwnerId: this.state.commentOwnerId,
-        commentOwnerUsername: this.state.commentOwnerUsername,
-        content: this.state.content,
-        createdAt: new Date().toISOString()
-      };
-      await API.graphql(graphqlOperation(createComment, { input }));
-
-      this.setState({ content: "" }); // clear field
+      await this.addComment();
     }
   }
 
