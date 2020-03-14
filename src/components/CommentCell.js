@@ -1,20 +1,34 @@
-import React from 'react'
+import React from 'react';
+import { ListItem, ListItemText, ListItemAvatar, Avatar, Typography } from '@material-ui/core';
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 
 const CommentCell = ({ commentData }) => {
   const { content, commentOwnerUsername, createdAt } = commentData;
   return (
-    <div className="comment">
-      <span style={{ fontStyle: "italic", color: "blue" }}>
-        {"Commment by: "} {commentOwnerUsername}
-        {" on "}
-        <time style={{ fontStyle: "italic" }}>
-          {" "}
-          {new Date(createdAt).toDateString()}
+    <ListItem>
+      <ListItemAvatar>
+        <Avatar>
+          <AccountCircleIcon />
+        </Avatar>
+      </ListItemAvatar>
+      <ListItemText
+        primary={content}
+        secondary={<Typography variant="subtitle2" color="textSecondary">
+          {"By"} {commentOwnerUsername}
+          {" on "}
+          <time>
+            {" "}
+            {new Date(createdAt).toLocaleString()}
 
-        </time>
-      </span>
-      <p> {content}</p>
-    </div>
+          </time>
+        </Typography>}
+      />
+      {/* <ListItemSecondaryAction>
+        <IconButton edge="end" aria-label="delete">
+          <DeleteIcon />
+        </IconButton>
+      </ListItemSecondaryAction> */}
+    </ListItem>
   )
 }
 

@@ -3,8 +3,13 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle
+  DialogTitle,
+  Button,
+  Grid,
+  TextField,
+  IconButton
 } from '@material-ui/core';
+import EditIcon from '@material-ui/icons/Edit';
 import { Auth, API, graphqlOperation } from 'aws-amplify';
 import { updatePost } from '../graphql/mutations';
 
@@ -25,8 +30,8 @@ class EditPost extends React.Component {
       })
   }
 
-  handlePostChange = event => {
-    this.setState({ [event.target.name]: event.target.value })
+  handlePostChange = name => event => {
+    this.setState({ [name]: event.target.value })
   }
 
   handleEditPost = () => {
@@ -50,42 +55,52 @@ class EditPost extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <Dialog onClose={() => this.setState({ showModal: false })} aria-labelledby="simple-dialog-title" open={this.state.showModal}>
+        <Dialog onClose={() => this.setState({ showModal: false })} maxWidth="sm" fullWidth open={this.state.showModal}>
           <DialogTitle id="simple-dialog-title">Edit Post</DialogTitle>
           <DialogContent>
-            <form className="add-post">
-              <input
-                style={{ font: '19px' }}
-                type="text"
-                name="postTitle"
-                placeholder="Post Title"
-                required
-                value={this.state.postTitle}
-                onChange={this.handlePostChange}
-              />
-
-              <textarea
-                type="text"
-                name="postBody"
-                rows="3"
-                cols="40"
-                placeholder="New Blog Post"
-                required
-                value={this.state.postBody}
-                onChange={this.handlePostChange}
-              />
-            </form>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  type="text"
+                  label="Post Title"
+                  required
+                  variant="outlined"
+                  value={this.state.postTitle}
+                  onChange={this.handlePostChange('postTitle')}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  type="text"
+                  rows="4"
+                  cols="40"
+                  variant="outlined"
+                  multiline
+                  label="New Blog Post"
+                  required
+                  value={this.state.postBody}
+                  onChange={this.handlePostChange('postBody')}
+                />
+              </Grid>
+            </Grid>
           </DialogContent>
           <DialogActions>
-            <button onClick={() => this.setState({ showModal: false })}>
+            <Button onClick={() => this.setState({ showModal: false })}>
               Cancel
-              </button>
-            <button type="submit" onClick={this.handleEditSubmit}>
+            </Button>
+            <Button onClick={this.handleEditSubmit} style={{
+              backgroundColor: '#FF9900',
+              color: 'white',
+              paddingLeft: '20px',
+              paddingRight: '20px'
+            }}>
               Submit
-              </button>
+            </Button>
           </DialogActions>
         </Dialog>
-        <button onClick={this.handleEditPost}>Edit</button>
+        <IconButton onClick={this.handleEditPost}><EditIcon /></IconButton>
       </React.Fragment>
     )
   }

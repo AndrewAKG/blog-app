@@ -6,6 +6,19 @@ import { deletePost } from '../graphql/mutations';
 import EditPost from './EditPost';
 import CreateComment from './CreateComment';
 import CommentCell from './CommentCell';
+import {
+  Grid,
+  Card,
+  Typography,
+  CardContent,
+  IconButton,
+  List,
+  ExpansionPanel,
+  ExpansionPanelSummary,
+  ExpansionPanelDetails
+} from '@material-ui/core';
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 class DisplayPosts extends Component {
   state = {
@@ -83,44 +96,56 @@ class DisplayPosts extends Component {
       <React.Fragment>
         <div>
           {this.state.posts.map(post => (
-            <div key={post.id} className="posts" style={rowStyle}>
-              <h1>{post.postTitle}</h1>
-              <span style={{ fontStyle: "italic", color: "blue" }}>
-                {"Wrote By "} {post.postOwnerUsername}
-                {" on "}
-                <time style={{ fontStyle: "italic" }}> {new Date(post.createdAt).toDateString()}</time>
-              </span>
-              <p>{post.postBody}</p>
-              <br />
-              <span>
-                <button onClick={() => this.handleDeletePost(post.id)}>
-                  Delete
-                </button>
-                <EditPost
-                  {...post}
-                />
-              </span>
-              <span>
-                <CreateComment postId={post.id}/>
-                {post.comments.items.length > 0 && <span style={{ fontSize: "19px", color: "gray" }}>
-                  Comments: </span>}
-                {
-                  post.comments.items.map((comment, index) => <CommentCell key={index} commentData={comment} />)
-                }
-              </span>
-            </div>
+            <Card raised key={post.id} style={{ margin: 16 }}>
+              <CardContent>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="h5">{post.postTitle}</Typography>
+                  <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <EditPost
+                      {...post}
+                    />
+                    <IconButton onClick={() => this.handleDeletePost(post.id)}>
+                      <DeleteForeverIcon />
+                    </IconButton>
+                  </div>
+                </div>
+                <Typography variant="subtitle2" color="textSecondary" component="p">
+                  {"Wrote By "} {post.postOwnerUsername}
+                  {" on "}
+                  <time> {new Date(post.createdAt).toLocaleString()}</time>
+                </Typography>
+                <Typography variant="body1" component="p" style={{ marginTop: 10, marginBottom: 32 }}>
+                  {post.postBody}
+                </Typography>
+
+                <ExpansionPanel TransitionProps={{ unmountOnExit: true }} style={{ boxShadow: 'none'}}>
+                  <ExpansionPanelSummary
+                    expandIcon={<ExpandMoreIcon />}
+                  >
+                    <Typography>Comments</Typography>
+                  </ExpansionPanelSummary>
+                  <ExpansionPanelDetails>
+                    <Grid container spacing={1}>
+                      <Grid item xs={12}>
+                        <CreateComment postId={post.id} />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <List >
+                          {
+                            post.comments.items.map((comment, index) => <CommentCell key={index} commentData={comment} />)
+                          }
+                        </List>
+                      </Grid>
+                    </Grid>
+                  </ExpansionPanelDetails>
+                </ExpansionPanel>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </React.Fragment>
     );
   }
-}
-
-const rowStyle = {
-  background: '#f4f4f4',
-  padding: '10px',
-  border: '1px #ccc dotted',
-  margin: '14px'
 }
 
 export default DisplayPosts;
