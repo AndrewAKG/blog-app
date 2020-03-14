@@ -55,6 +55,12 @@ export const listPosts = `query ListPosts(
         nextToken
       }
       likes {
+        items {
+          id
+          numberLikes
+          likeOwnerId
+          likeOwnerUsername
+        }
         nextToken
       }
     }

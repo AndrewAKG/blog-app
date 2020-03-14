@@ -39,6 +39,7 @@ class CreateComment extends React.Component {
 
   handleKeyPress = async e => {
     if (e.key === 'Enter' && this.state.content) {
+      e.preventDefault();
       const input = {
         commentPostId: this.props.postId,
         commentOwnerId: this.state.commentOwnerId,
@@ -82,7 +83,7 @@ class CreateComment extends React.Component {
                 }}
                 onClick={this.handleAddComment}
               >
-                Add Comment
+                Comment
               </Button>
             </div>
           </Grid>}

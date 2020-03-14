@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { listPosts } from '../graphql/queries';
-import { onCreatePost, onDeletePost, onUpdatePost, onCreateComment } from '../graphql/subscriptions';
-import { API, graphqlOperation } from 'aws-amplify';
-import { deletePost } from '../graphql/mutations';
+import { onCreatePost, onDeletePost, onUpdatePost, onCreateComment, onCreateLike, onDeleteLike } from '../graphql/subscriptions';
+import { Auth, API, graphqlOperation } from 'aws-amplify';
+import { createLike, deletePost, deleteLike } from '../graphql/mutations';
 import EditPost from './EditPost';
 import CreateComment from './CreateComment';
 import CommentCell from './CommentCell';
@@ -19,20 +19,29 @@ import {
 } from '@material-ui/core';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 
 class DisplayPosts extends Component {
   state = {
-    posts: []
+    posts: [],
+    ownerId: "",
+    ownerUsername: "",
+    isHovering: false,
+    postLikedBy: []
   }
 
   componentDidMount = async () => {
     this.getPosts();
+    await Auth.currentUserInfo()
+      .then(user => {
+        this.setState({ ownerId: user.attributes.sub, ownerUsername: user.username });
+      })
 
     this.createPostListener = API.graphql(graphqlOperation(onCreatePost))
       .subscribe({
         next: postData => {
           const newPost = postData.value.data.onCreatePost;
-          const prevPosts = this.state.posts;
+          const prevPosts = this.state.posts.filter(post => post.id !== newPost.id);
           const updatedPosts = [newPost, ...prevPosts];
           this.setState({ posts: updatedPosts });
         }
@@ -71,7 +80,36 @@ class DisplayPosts extends Component {
           }
           this.setState({ posts });
         }
-      })
+      });
+
+    this.createPostLikeListener = API.graphql(graphqlOperation(onCreateLike))
+      .subscribe({
+        next: likeData => {
+          const createdLike = likeData.value.data.onCreateLike;
+          let posts = [...this.state.posts];
+          for (let post of posts) {
+            if (createdLike.post.id === post.id) {
+              post.likes.items.push(createdLike);
+            }
+          }
+          this.setState({ posts });
+        }
+      });
+
+    this.createPostLikeListener = API.graphql(graphqlOperation(onDeleteLike))
+      .subscribe({
+        next: likeData => {
+          const deletedLike = likeData.value.data.onDeleteLike;
+          let posts = [...this.state.posts];
+          for (let post of posts) {
+            if (deletedLike.post.id === post.id) {
+              let newLikes = post.likes.items.filter(item => item.id !== deletedLike.id);
+              post.likes.items = newLikes;
+            }
+          }
+          this.setState({ posts });
+        }
+      });
   }
 
   componentWillUnmount() {
@@ -91,7 +129,62 @@ class DisplayPosts extends Component {
     this.setState({ posts: result.data.listPosts.items });
   }
 
+  likedPost = (postId) => {
+    for (let post of this.state.posts) {
+      if (post.id === postId) {
+        for (let like of post.likes.items) {
+          if (like.likeOwnerId === this.state.ownerId) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  findMyLikeId = (postId) => {
+    for (let post of this.state.posts) {
+      if (post.id === postId) {
+        for (let like of post.likes.items) {
+          if (like.likeOwnerId === this.state.ownerId) {
+            return like.id;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  handleLike = async (postId) => {
+    if (this.likedPost(postId)) {
+      const input = {
+        id: this.findMyLikeId(postId)
+      };
+
+      try {
+        await API.graphql(graphqlOperation(deleteLike, { input }));
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    else {
+      const input = {
+        numberLikes: 1,
+        likeOwnerId: this.state.ownerId,
+        likeOwnerUsername: this.state.ownerUsername,
+        likePostId: postId
+      };
+
+      try {
+        const result = await API.graphql(graphqlOperation(createLike, { input }));
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+
   render() {
+    const loggedInUserId = this.state.ownerId;
     return (
       <React.Fragment>
         <div>
@@ -101,28 +194,41 @@ class DisplayPosts extends Component {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography variant="h5">{post.postTitle}</Typography>
                   <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' }}>
-                    <EditPost
-                      {...post}
-                    />
-                    <IconButton onClick={() => this.handleDeletePost(post.id)}>
-                      <DeleteForeverIcon />
-                    </IconButton>
+                    {post.postOwnerId === loggedInUserId &&
+                      <EditPost
+                        {...post}
+                      />
+                    }
+                    {post.postOwnerId === loggedInUserId &&
+                      <IconButton onClick={() => this.handleDeletePost(post.id)}>
+                        <DeleteForeverIcon />
+                      </IconButton>
+                    }
                   </div>
                 </div>
+
                 <Typography variant="subtitle2" color="textSecondary" component="p">
                   {"Wrote By "} {post.postOwnerUsername}
                   {" on "}
                   <time> {new Date(post.createdAt).toLocaleString()}</time>
                 </Typography>
+
                 <Typography variant="body1" component="p" style={{ marginTop: 10, marginBottom: 32 }}>
                   {post.postBody}
                 </Typography>
 
-                <ExpansionPanel TransitionProps={{ unmountOnExit: true }} style={{ boxShadow: 'none'}}>
+                <Typography variant="body1" component="p" style={{ marginBottom: 10 }}>
+                  <IconButton onClick={() => this.handleLike(post.id)}>
+                    <ThumbUpIcon color={this.likedPost(post.id) ? "primary" : "disabled"} />
+                  </IconButton>
+                  {post.likes.items.length}
+                </Typography>
+
+                <ExpansionPanel TransitionProps={{ unmountOnExit: true }} style={{ boxShadow: 'none' }}>
                   <ExpansionPanelSummary
                     expandIcon={<ExpandMoreIcon />}
                   >
-                    <Typography>Comments</Typography>
+                    <Typography>Comments  ({post.comments.items.length})</Typography>
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
                     <Grid container spacing={1}>
