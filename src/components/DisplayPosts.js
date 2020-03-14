@@ -199,7 +199,7 @@ class DisplayPosts extends Component {
       };
 
       try {
-        const result = await API.graphql(graphqlOperation(createLike, { input }));
+        await API.graphql(graphqlOperation(createLike, { input }));
       } catch (error) {
         console.error(error);
       }
