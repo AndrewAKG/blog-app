@@ -1,5 +1,5 @@
-# blog-app
-Simple real-time blog app using react, aws appsync, aws amplify, graphql and aws dynamo db.
+# Simple Blog Application
+- Simple real-time blog app using react, aws appsync, aws amplify, graphql and aws dynamo db.
 
 # Features
 - user can create an account, sign in and reset password.
